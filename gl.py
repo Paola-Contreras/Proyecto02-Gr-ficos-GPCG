@@ -8,7 +8,7 @@ from obj import Obj
 
 
 STEPS = 1
-MAX_RECURSION_DEPTH = 3
+MAX_RECURSION_DEPTH = 4
 
 V2 = namedtuple('Point2', ['x', 'y'])
 V3 = namedtuple('Point3', ['x', 'y', 'z'])
@@ -151,7 +151,37 @@ class Raytracer(object):
 
             finalColor = reflectColor + specColor
 
+        elif material.matType == TRANSPARENT:
+            outside = np.dot(dir, intersect.normal) < 0
+            bias = intersect.normal * 0.001
+
+            specColor = np.array([0,0,0])
+            for light in self.lights:
+                specColor = np.add(specColor, light.getSpecColor(intersect, self))
+
+            reflect = reflectVector(intersect.normal, np.array(dir) * -1)
+            reflectOrig = np.add(intersect.point, bias) if outside else np.subtract(intersect.point, bias)
+            reflectColor = self.cast_ray(reflectOrig, reflect, None, recursion + 1)
+            reflectColor = np.array(reflectColor)
+
+            kr = fresnel(intersect.normal, dir, material.ior)
+
+            refractColor = np.array([0,0,0])
+            if kr < 1:
+                refract = refractVector(intersect.normal, dir, material.ior)
+                refractOrig = np.subtract(intersect.point, bias) if outside else np.add(intersect.point, bias)
+                refractColor = self.cast_ray(refractOrig, refract, None, recursion + 1)
+                refractColor = np.array(refractColor)
+
+            finalColor = reflectColor * kr + refractColor * (1 - kr) + specColor
+
+
         finalColor *= objectColor
+
+        if material.texture and intersect.texcoords:
+            texColor = material.texture.getColor(intersect.texcoords[0], intersect.texcoords[1])
+            if texColor is not None:
+                finalColor *= np.array(texColor)
 
         r = min(1, finalColor[0])
         g = min(1, finalColor[1])
