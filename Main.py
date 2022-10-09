@@ -10,8 +10,8 @@ height = 520
 # Materiales
 
 brick = Material(diffuse = (0.8, 0.3, 0.3), spec = 16)
-stone = Material(diffuse = (0.4, 0.4, 0.4), spec = 8)
-grass = Material(diffuse = (0.3, 1.0, 0.3), spec = 64)
+stone = Material(diffuse = (0.33, 0.36, 0.44), spec = 64)
+grass = Material(diffuse = (0.57, 0.59, 0.63), spec = 64)
 
 
 marble = Material(spec = 64, texture = Texture("marble.bmp"), matType= REFLECTIVE)
@@ -24,21 +24,17 @@ rtx = Raytracer(width, height)
 rtx.envMap = Texture("env map.bmp")
 
 rtx.lights.append( AmbientLight(intensity = 0.1 ))
-rtx.lights.append( DirectionalLight(direction = (0,0,-1), intensity = 0.5 ))
-rtx.lights.append( PointLight(point = (-1,-1,0) ))
+rtx.lights.append( DirectionalLight(direction = (-1,-1,-1), intensity = 0.5 ))
+rtx.lights.append( PointLight(point = (1,1,0) ))
 
 
-# rtx.scene.append( Plane(position = (0,-10,0), normal = (0,1,0), material = brick ))
-# rtx.scene.append( Plane(position = (0,10,0), normal = (0,-1,0), material = brick ))
-# rtx.scene.append( Plane(position = (-10,0,0), normal = (1,0,0), material = stone ))
-# rtx.scene.append( Plane(position = (10,0,0), normal = (-1,0,0), material = stone ))
-#rtx.scene.append( Plane(position = V3(0,-10,0), normal = V3(0,1,0), material = stone ))
+rtx.scene.append( Disk(position = (0,-2,-7), radius = 7, normal = (0,1,0), material = stone ))
 
-#rtx.scene.append(Plane(position = V3(0,-20,0), normal = V3(0,0, 1), material = stone))
-rtx.scene.append( Disk(position = (0,-3,-7), radius = 7, normal = (0,1,0), material = stone ))
-
-# rtx.scene.append( AABB(position = (-2,1,-10), size = (2,2,2), material = glass))
-# rtx.scene.append( AABB(position = (2,1,-10), size = (2,2,2), material = marble))
+rtx.scene.append( AABB(position = (1.4,-1.35,-7), size = (1.5,1.5,1.5), material = grass))
+rtx.scene.append( AABB(position = (-1.8,-2.3,-7), size = (2,2,2), material = grass))
+rtx.scene.append( Sphere((-1.8,-0.4,-7),1.3, glass))
+rtx.scene.append( Sphere((0.4,-1.5,-6),0.54, marble))
+rtx.scene.append( Sphere((3.3,-1.2,-5.8), 0.8 , mirror))
 
 rtx.glRender()
 

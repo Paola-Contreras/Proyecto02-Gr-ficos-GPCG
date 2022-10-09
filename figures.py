@@ -126,6 +126,7 @@ class AABB(object):
         self.position = position
         self.size = size
         self.material = material
+   
 
         self.planes = []
 
