@@ -207,3 +207,78 @@ class AABB(object):
                          texcoords = (u,v),
                          sceneObj = self)
 
+class Torus2D(object):
+    def __init__(self, position, radius,radius2, normal,  material):
+        self.plane = Plane(position, normal, material)
+        self.material = material
+        self.radius = radius
+        self.radius2 = radius2
+
+    def ray_intersect(self, orig, dir):
+
+        intersect = self.plane.ray_intersect(orig, dir)
+
+        if intersect is None:
+            return None
+
+        contact = np.subtract(intersect.point, self.plane.position)
+        contact = np.linalg.norm(contact)
+
+        if contact > self.radius:
+            return None
+        
+        if self.radius2 > contact:
+            return None
+
+        return Intersect(distance = intersect.distance,
+                         point = intersect.point,
+                         normal = self.plane.normal,
+                         texcoords = None,
+                         sceneObj = self)
+
+class Torus3D(object):
+    def __init__(self, center, radius, radius2, material):
+        self.center = center
+        self.radius = radius
+        self.material = material
+        self.radius2 = radius2
+      
+
+    def ray_intersect(self, orig, dir):
+        L = np.subtract(self.center, orig)
+        tca = np.dot(L, dir)
+        d = (np.linalg.norm(L) ** 2 - tca ** 2) ** 0.5
+
+        if d > self.radius:
+            return None
+        
+        if self.radius2 > d:
+            return None
+
+        thc = (self.radius ** 2 - d ** 2) ** 0.5
+
+        t0 = tca - thc
+        t1 = tca + thc
+
+        if t0 < 0:
+            t0 = t1
+        if t0 < 0:
+            return None
+        
+        
+        
+        # P = O + t0 * D
+        P = np.add(orig, t0 * np.array(dir))
+        normal = np.subtract(P, self.center)
+        normal = normal / np.linalg.norm(normal)
+
+        u = 1 - ((np.arctan2(normal[2], normal[0]) / (2 * np.pi)) + 0.5)
+        v = np.arccos(-normal[1]) / np.pi
+
+        uvs = (u,v)
+
+        return Intersect(distance = t0,
+                         point = P,
+                         normal = normal,
+                         texcoords = uvs,
+                         sceneObj = self)
