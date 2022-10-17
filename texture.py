@@ -1,7 +1,7 @@
 
 import struct
-import numpy as np
-from numpy import arctan2, arccos, pi
+import math_lib as ml
+from math import pi, atan2, acos
 
 class Texture(object):
     def __init__(self, filename):
@@ -36,17 +36,10 @@ class Texture(object):
             return None
 
     def getEnvColor(self, dir):
-        dir = dir / np.linalg.norm(dir)
+        dir = ml.normalized(dir)
 
-        x = int((arctan2(dir[2], dir[0]) / (2 * pi) + 0.5) * self.width)
-        y = int(arccos(-dir[1]) / pi * self.height)
+        x = int((atan2(dir[2], dir[0]) / (2 * pi) + 0.5) * self.width)
+        y = int(acos(-dir[1]) / pi * self.height)
 
         return self.pixels[y][x]
-
-
-
-
-
-
-
 

@@ -1,4 +1,5 @@
 import numpy as np
+import math_lib as ml 
 
 DIR_LIGHT = 0
 POINT_LIGHT = 1
