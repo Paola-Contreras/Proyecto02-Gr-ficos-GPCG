@@ -1,4 +1,3 @@
-import numpy as np
 import math_lib as ml 
 
 DIR_LIGHT = 0
@@ -81,9 +80,9 @@ class DirectionalLight(object):
         intensity = ml.dot(intersect.normal, light_dir) * self.intensity
         intensity = float(max(0, intensity))            
                                                         
-        diffuseColor = np.array([intensity * self.color[0],
-                                 intensity * self.color[1],
-                                 intensity * self.color[2]])
+        diffuseColor = [intensity * self.color[0],
+                        intensity * self.color[1],
+                        intensity * self.color[2]]
 
         return diffuseColor
 
@@ -92,12 +91,11 @@ class DirectionalLight(object):
         reflect = reflectVector(intersect.normal, light_dir)
 
         view_dir = ml.subtract( raytracer.camPosition, intersect.point)
-        view_dir = view_dir / np.linalg.norm(view_dir)
-
+        view_dir = ml.normalized(view_dir)
         spec_intensity = self.intensity * max(0,ml.dot(view_dir, reflect)) ** intersect.sceneObj.material.spec
-        specColor = np.array([spec_intensity * self.color[0],
+        specColor = [spec_intensity * self.color[0],
                               spec_intensity * self.color[1],
-                              spec_intensity * self.color[2]])
+                              spec_intensity * self.color[2]]
 
         return specColor
 
@@ -123,15 +121,15 @@ class PointLight(object):
 
     def getDiffuseColor(self, intersect, raytracer):
         light_dir = ml.subtract(self.point, intersect.point)
-        light_dir = light_dir / np.linalg.norm(light_dir)
+        light_dir = ml.normalized(light_dir)
 
         attenuation = 1.0
         intensity = ml.dot(intersect.normal, light_dir) * attenuation
         intensity = float(max(0, intensity))            
                                                         
-        diffuseColor = np.array([intensity * self.color[0],
-                                 intensity * self.color[1],
-                                 intensity * self.color[2]])
+        diffuseColor = [intensity * self.color[0],
+                        intensity * self.color[1],
+                        intensity * self.color[2]]
 
         return diffuseColor
 
@@ -142,21 +140,27 @@ class PointLight(object):
         reflect = reflectVector(intersect.normal, light_dir)
 
         view_dir = ml.subtract( raytracer.camPosition, intersect.point)
-        view_dir = view_dir / np.linalg.norm(view_dir)
+        view_dir = ml.normalized(view_dir)
 
         attenuation = 1.0
 
         spec_intensity = attenuation * max(0,ml.dot(view_dir, reflect)) ** intersect.sceneObj.material.spec
-        specColor = np.array([spec_intensity * self.color[0],
-                              spec_intensity * self.color[1],
-                              spec_intensity * self.color[2]])
+        specColor = [spec_intensity * self.color[0],
+                     spec_intensity * self.color[1],
+                     spec_intensity * self.color[2]]
 
         return specColor
 
     def getShadowIntensity(self, intersect, raytracer):
-        light_dir = ml.subtract(self.point, intersect.point)
-        light_distance = np.linalg.norm(light_dir)
-        light_dir = light_dir / light_distance
+        light_dir = ml.subtract(self.point, intersect.point) 
+        light_distance = (light_dir[0] **2 + light_dir[1]**2 + light_dir[2]**2)**0.5
+        
+        tempLd =[]
+        for i in range(len(light_dir)):
+            vv = light_dir[i] / light_distance
+            tempLd.append(vv)
+
+        light_dir =tempLd
 
         shadow_intensity = 0
         shadow_intersect = raytracer.scene_intersect(intersect.point, light_dir, intersect.sceneObj)
@@ -174,7 +178,7 @@ class AmbientLight(object):
         self.lightType = AMBIENT_LIGHT
 
     def getDiffuseColor(self, intersect, raytracer):
-        return np.array(self.color) * self.intensity
+        return ml.fix(self.color,self.intensity)
 
     def getSpecColor(self, intersect, raytracer):
         return [0,0,0]

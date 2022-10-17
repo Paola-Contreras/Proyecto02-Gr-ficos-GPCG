@@ -125,10 +125,10 @@ class Raytracer(object):
 
         material = intersect.sceneObj.material
 
-        finalColor = np.array([0,0,0])
-        objectColor = np.array([material.diffuse[0],
-                                material.diffuse[1],
-                                material.diffuse[2]])
+        finalColor = [0,0,0]
+        objectColor = [material.diffuse[0],
+                       material.diffuse[1],
+                       material.diffuse[2]]
 
         if material.matType == OPAQUE:
             for light in self.lights:
@@ -141,52 +141,86 @@ class Raytracer(object):
                 finalColor = ml.add(finalColor, lightColor)
 
         elif material.matType == REFLECTIVE:
-            reflect = reflectVector(intersect.normal, np.array(dir) * -1)
-            reflectColor = self.cast_ray(intersect.point, reflect, intersect.sceneObj, recursion + 1)
-            reflectColor = np.array(reflectColor)
 
-            specColor = np.array([0,0,0])
+            tempdir =[]
+            for i in range(len(dir)):
+                val2 = dir[i] * -1
+                tempdir.append(val2)
+
+            reflect = reflectVector(intersect.normal,tempdir)
+            reflectColor = self.cast_ray(intersect.point, reflect, intersect.sceneObj, recursion + 1)
+            reflectColor = reflectColor
+
+            specColor = [0,0,0]
             for light in self.lights:
                 specColor = ml.add(specColor, light.getSpecColor(intersect, self))
-
-            finalColor = reflectColor + specColor
+           
+            finalColor = ml.add(reflectColor,specColor)
+           
 
         elif material.matType == TRANSPARENT:
             outside = ml.dot(dir, intersect.normal) < 0
-            #bias = intersect.normal * 0.001
 
             bias = []
             for i in range(len(intersect.normal)):
                 val =intersect.normal[i] * 0.001
                 bias.append(val)
 
-            specColor = np.array([0,0,0])
+            tempdir2 =[]
+            for i in range(len(dir)):
+                val3 = dir[i] * -1
+                tempdir2.append(val3)
+
+            specColor = [0,0,0]
             for light in self.lights:
                 specColor = ml.add(specColor, light.getSpecColor(intersect, self))
 
             reflect = reflectVector(intersect.normal, np.array(dir) * -1)
             reflectOrig = ml.add(intersect.point, bias) if outside else ml.subtract(intersect.point, bias)
             reflectColor = self.cast_ray(reflectOrig, reflect, None, recursion + 1)
-            reflectColor = np.array(reflectColor)
+            reflectColor = reflectColor
 
             kr = fresnel(intersect.normal, dir, material.ior)
 
-            refractColor = np.array([0,0,0])
+            refractColor = [0,0,0]
             if kr < 1:
                 refract = refractVector(intersect.normal, dir, material.ior)
                 refractOrig = ml.subtract(intersect.point, bias) if outside else ml.add(intersect.point, bias)
                 refractColor = self.cast_ray(refractOrig, refract, None, recursion + 1)
-                refractColor = np.array(refractColor)
+             
 
-            finalColor = reflectColor * kr + refractColor * (1 - kr) + specColor
+            tempRC = []
+            for i in range(len(reflectColor)):
+                valor = reflectColor[i] * kr 
+                tempRC.append(valor)
 
+            tempRC2 = []
+            for i in range(len(refractColor)):
+                valor = refractColor[i] * (1 - kr)
+                tempRC2.append(valor)
 
-        finalColor *= objectColor
+            finalColor = ml.addx3(tempRC,tempRC2,specColor)
+        
+        FCOC =[]
+        for j in range(len(finalColor)):
+            tam =  objectColor[j] * finalColor[j] 
+            FCOC.append(tam)
+        finalColor = FCOC
+
 
         if material.texture and intersect.texcoords:
             texColor = material.texture.getColor(intersect.texcoords[0], intersect.texcoords[1])
+           
             if texColor is not None:
-                finalColor *= np.array(texColor)
+                tempFC= []
+                for i in range(len(finalColor)):
+                    valo = finalColor[i] * texColor[i]
+                    tempFC.append(valo)
+
+                finalColor = tempFC
+
+        if len(finalColor) == 0:
+            return (finalColor)
 
         r = min(1, finalColor[0])
         g = min(1, finalColor[1])
@@ -215,7 +249,7 @@ class Raytracer(object):
 
                 rayColor = self.cast_ray(self.camPosition, direction)
 
-                if rayColor is not None:
+                if rayColor is not None and len(rayColor) != 0:
                     rayColor = color(rayColor[0],rayColor[1],rayColor[2])
                     self.glPoint(x, y, rayColor)
 
