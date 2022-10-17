@@ -1,4 +1,6 @@
 import numpy as np
+import math_lib as ml
+from math import pi, atan2, acos
 
 WHITE = (1,1,1)
 BLACK = (0,0,0)
@@ -32,8 +34,8 @@ class Sphere(object):
         self.material = material
 
     def ray_intersect(self, orig, dir):
-        L = np.subtract(self.center, orig)
-        tca = np.dot(L, dir)
+        L = ml.subtract(self.center, orig)
+        tca = ml.dot(L, dir)
         d = (np.linalg.norm(L) ** 2 - tca ** 2) ** 0.5
 
         if d > self.radius:
@@ -51,11 +53,11 @@ class Sphere(object):
         
         # P = O + t0 * D
         P = np.add(orig, t0 * np.array(dir))
-        normal = np.subtract(P, self.center)
+        normal = ml.subtract(P, self.center)
         normal = normal / np.linalg.norm(normal)
 
-        u = 1 - ((np.arctan2(normal[2], normal[0]) / (2 * np.pi)) + 0.5)
-        v = np.arccos(-normal[1]) / np.pi
+        u = 1 - ((atan2(normal[2], normal[0]) / (2 * pi)) + 0.5)
+        v = acos(-normal[1]) / pi
 
         uvs = (u,v)
 
@@ -74,15 +76,15 @@ class Plane(object):
 
     def ray_intersect(self, orig, dir):
         # Distancia = (( planePos - origRayo) o normal) / (direccionRayo o normal)
-        denom = np.dot( dir, self.normal)
+        denom = ml.dot( dir, self.normal)
 
         if abs(denom) > 0.0001:
-            num = np.dot( np.subtract(self.position, orig), self.normal)
+            num = ml.dot( ml.subtract(self.position, orig), self.normal)
             t = num / denom
 
             if t > 0:
                 # P = O + t*D
-                P = np.add(orig, t * np.array(dir))
+                P = ml.add(orig, t * np.array(dir))
                 return Intersect(distance = t,
                                  point = P,
                                  normal = self.normal,
@@ -104,7 +106,7 @@ class Disk(object):
         if intersect is None:
             return None
 
-        contact = np.subtract(intersect.point, self.plane.position)
+        contact = ml.subtract(intersect.point, self.plane.position)
         contact = np.linalg.norm(contact)
 
         if contact > self.radius:
@@ -137,16 +139,16 @@ class AABB(object):
         halfSizes[2] = size[2] / 2
 
         # Sides
-        self.planes.append( Plane( np.add(position, (halfSizes[0],0,0)), (1,0,0), material ))
-        self.planes.append( Plane( np.add(position, (-halfSizes[0],0,0)), (-1,0,0), material ))
+        self.planes.append( Plane( ml.add(position, (halfSizes[0],0,0)), (1,0,0), material ))
+        self.planes.append( Plane( ml.add(position, (-halfSizes[0],0,0)), (-1,0,0), material ))
 
         # Up and Down
-        self.planes.append( Plane( np.add(position, (0,halfSizes[1],0)), (0,1,0), material ))
-        self.planes.append( Plane( np.add(position, (0,-halfSizes[1],0)), (0,-1,0), material ))
+        self.planes.append( Plane( ml.add(position, (0,halfSizes[1],0)), (0,1,0), material ))
+        self.planes.append( Plane( ml.add(position, (0,-halfSizes[1],0)), (0,-1,0), material ))
 
         # Front and back
-        self.planes.append( Plane( np.add(position, (0,0,halfSizes[2])), (0,0,1), material ))
-        self.planes.append( Plane( np.add(position, (0,0,-halfSizes[2])), (0,0,-1), material ))
+        self.planes.append( Plane( ml.add(position, (0,0,halfSizes[2])), (0,0,1), material ))
+        self.planes.append( Plane( ml.add(position, (0,0,-halfSizes[2])), (0,0,-1), material ))
 
         #Bounds
         self.boundsMin = [0,0,0]
@@ -221,7 +223,7 @@ class Torus2D(object):
         if intersect is None:
             return None
 
-        contact = np.subtract(intersect.point, self.plane.position)
+        contact = ml.subtract(intersect.point, self.plane.position)
         contact = np.linalg.norm(contact)
 
         if contact > self.radius:
@@ -245,8 +247,8 @@ class Torus3D(object):
       
 
     def ray_intersect(self, orig, dir):
-        L = np.subtract(self.center, orig)
-        tca = np.dot(L, dir)
+        L = ml.subtract(self.center, orig)
+        tca = ml.dot(L, dir)
         d = (np.linalg.norm(L) ** 2 - tca ** 2) ** 0.5
 
         if d > self.radius:
@@ -269,11 +271,11 @@ class Torus3D(object):
         
         # P = O + t0 * D
         P = np.add(orig, t0 * np.array(dir))
-        normal = np.subtract(P, self.center)
+        normal = ml.subtract(P, self.center)
         normal = normal / np.linalg.norm(normal)
 
-        u = 1 - ((np.arctan2(normal[2], normal[0]) / (2 * np.pi)) + 0.5)
-        v = np.arccos(-normal[1]) / np.pi
+        u = 1 - ((atan2(normal[2], normal[0]) / (2 * pi)) + 0.5)
+        v = acos(-normal[1]) / pi
 
         uvs = (u,v)
 
