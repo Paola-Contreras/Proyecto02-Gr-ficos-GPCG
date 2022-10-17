@@ -153,7 +153,12 @@ class Raytracer(object):
 
         elif material.matType == TRANSPARENT:
             outside = ml.dot(dir, intersect.normal) < 0
-            bias = intersect.normal * 0.001
+            #bias = intersect.normal * 0.001
+
+            bias = []
+            for i in range(len(intersect.normal)):
+                val =intersect.normal[i] * 0.001
+                bias.append(val)
 
             specColor = np.array([0,0,0])
             for light in self.lights:
@@ -206,7 +211,7 @@ class Raytracer(object):
                 Py *= t
 
                 direction = V3(Px, Py, -self.nearPlane)
-                direction = direction / np.linalg.norm(direction)
+                direction = ml.normalized(direction)
 
                 rayColor = self.cast_ray(self.camPosition, direction)
 

@@ -1,4 +1,3 @@
-import numpy as np
 import math_lib as ml
 from math import pi, atan2, acos
 
@@ -36,7 +35,9 @@ class Sphere(object):
     def ray_intersect(self, orig, dir):
         L = ml.subtract(self.center, orig)
         tca = ml.dot(L, dir)
-        d = (np.linalg.norm(L) ** 2 - tca ** 2) ** 0.5
+
+        Sum= (L[0] **2 + L[1]**2 + L[2]**2)**0.5
+        d = (Sum ** 2 - tca ** 2) ** 0.5
 
         if d > self.radius:
             return None
@@ -52,9 +53,15 @@ class Sphere(object):
             return None
         
         # P = O + t0 * D
-        P = np.add(orig, t0 * np.array(dir))
+        mul = []
+        for j in range(len(dir)):
+            res = t0 * dir[j]
+            mul.append(res)
+        
+
+        P = ml.add(orig, mul)
         normal = ml.subtract(P, self.center)
-        normal = normal / np.linalg.norm(normal)
+        normal = ml.normalized(normal)
 
         u = 1 - ((atan2(normal[2], normal[0]) / (2 * pi)) + 0.5)
         v = acos(-normal[1]) / pi
@@ -71,7 +78,7 @@ class Sphere(object):
 class Plane(object):
     def __init__(self, position, normal,  material):
         self.position = position
-        self.normal = normal / np.linalg.norm(normal)
+        self.normal = ml.normalized(normal)
         self.material = material
 
     def ray_intersect(self, orig, dir):
@@ -84,7 +91,12 @@ class Plane(object):
 
             if t > 0:
                 # P = O + t*D
-                P = ml.add(orig, t * np.array(dir))
+                temp =[]
+                for i in range(len(dir)):
+                    val = dir[i] * t 
+                    temp.append(val)
+
+                P = ml.add(orig,temp)
                 return Intersect(distance = t,
                                  point = P,
                                  normal = self.normal,
@@ -107,8 +119,9 @@ class Disk(object):
             return None
 
         contact = ml.subtract(intersect.point, self.plane.position)
-        contact = np.linalg.norm(contact)
-
+        contact1 = contact 
+        contact = (contact1[0] **2 + contact1[1]**2 + contact1[2]**2)**0.5
+        
         if contact > self.radius:
             return None
 
@@ -209,35 +222,6 @@ class AABB(object):
                          texcoords = (u,v),
                          sceneObj = self)
 
-class Torus2D(object):
-    def __init__(self, position, radius,radius2, normal,  material):
-        self.plane = Plane(position, normal, material)
-        self.material = material
-        self.radius = radius
-        self.radius2 = radius2
-
-    def ray_intersect(self, orig, dir):
-
-        intersect = self.plane.ray_intersect(orig, dir)
-
-        if intersect is None:
-            return None
-
-        contact = ml.subtract(intersect.point, self.plane.position)
-        contact = np.linalg.norm(contact)
-
-        if contact > self.radius:
-            return None
-        
-        if self.radius2 > contact:
-            return None
-
-        return Intersect(distance = intersect.distance,
-                         point = intersect.point,
-                         normal = self.plane.normal,
-                         texcoords = None,
-                         sceneObj = self)
-
 class Torus3D(object):
     def __init__(self, center, radius, radius2, material):
         self.center = center
@@ -249,7 +233,9 @@ class Torus3D(object):
     def ray_intersect(self, orig, dir):
         L = ml.subtract(self.center, orig)
         tca = ml.dot(L, dir)
-        d = (np.linalg.norm(L) ** 2 - tca ** 2) ** 0.5
+
+        Sum= (L[0] **2 + L[1]**2 + L[2]**2)**0.5
+        d = (Sum ** 2 - tca ** 2) ** 0.5
 
         if d > self.radius:
             return None
@@ -267,12 +253,17 @@ class Torus3D(object):
         if t0 < 0:
             return None
         
+        mul = []
+        for j in range(len(dir)):
+            res = t0 * dir[j]
+            mul.append(res)
         
+
+        P = ml.add(orig, mul)
         
         # P = O + t0 * D
-        P = np.add(orig, t0 * np.array(dir))
         normal = ml.subtract(P, self.center)
-        normal = normal / np.linalg.norm(normal)
+        normal = ml.normalized(normal)
 
         u = 1 - ((atan2(normal[2], normal[0]) / (2 * pi)) + 0.5)
         v = acos(-normal[1]) / pi
