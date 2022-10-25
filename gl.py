@@ -1,6 +1,5 @@
 import struct
 from collections import namedtuple
-import numpy as np
 from figures import *
 from lights import *
 from math import cos, sin, tan, pi
@@ -174,7 +173,7 @@ class Raytracer(object):
             specColor = [0,0,0]
             for light in self.lights:
                 specColor = ml.add(specColor, light.getSpecColor(intersect, self))
-
+            import numpy as np
             reflect = reflectVector(intersect.normal, np.array(dir) * -1)
             reflectOrig = ml.add(intersect.point, bias) if outside else ml.subtract(intersect.point, bias)
             reflectColor = self.cast_ray(reflectOrig, reflect, None, recursion + 1)

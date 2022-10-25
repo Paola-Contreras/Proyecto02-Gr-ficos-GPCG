@@ -1,5 +1,4 @@
 import math_lib as ml 
-import numpy as np
 
 DIR_LIGHT = 0
 POINT_LIGHT = 1
@@ -94,7 +93,7 @@ class DirectionalLight(object):
 
         view_dir = ml.subtract( raytracer.camPosition, intersect.point)
         view_dir = ml.normalized(view_dir)
-
+        import numpy as np
         spec_intensity = self.intensity * max(0,ml.dot(view_dir, reflect)) ** intersect.sceneObj.material.spec
         specColor = np.array([spec_intensity * self.color[0],
                               spec_intensity * self.color[1],
@@ -145,7 +144,7 @@ class PointLight(object):
         view_dir = ml.normalized(view_dir)
 
         attenuation = 1.0
-
+        import numpy as np
         spec_intensity = attenuation * max(0,ml.dot(view_dir, reflect)) ** intersect.sceneObj.material.spec
         specColor = np.array([spec_intensity * self.color[0],
                               spec_intensity * self.color[1],
